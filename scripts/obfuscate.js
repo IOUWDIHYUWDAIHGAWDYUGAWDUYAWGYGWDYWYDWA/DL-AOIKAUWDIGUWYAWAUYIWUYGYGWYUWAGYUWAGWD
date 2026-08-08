@@ -47,8 +47,12 @@ const OPTIONS = {
     unicodeEscapeSequence: false,
 };
 
-// dist/ temizle
-fs.rmSync(DIST, { recursive: true, force: true });
+// dist/ temizle (Windows kilitliyse üzerine yazarak devam et)
+try {
+    fs.rmSync(DIST, { recursive: true, force: true });
+} catch (e) {
+    console.warn('⚠️ dist/ silinemedi, üzerine yazılıyor:', e.message);
+}
 for (const dir of ['commands', 'events', 'utils']) {
     fs.mkdirSync(path.join(DIST, dir), { recursive: true });
 }

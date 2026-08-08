@@ -1,4 +1,4 @@
-# Nova Bot — 7/24 ücretsiz barındırma (kredi kartı gerekmez)
+# QBJBXSANFHKEMVNAOCLMBPVQ Bot — 7/24 ücretsiz barındırma (kredi kartı gerekmez)
 #
 # Nasıl çalışır:
 #  - Public repo'daki GitHub Actions dakikaları ücretsizdir (sınırsız).
@@ -11,7 +11,7 @@
 # Kurulum: DEPLOY.md'deki "Kredi kartı gerektirmeyen" bölümüne bak.
 # Gerekli repo secret'ları: TOKEN, CLIENT_ID, GUILD_ID (+ isteğe bağlı diğerleri)
 
-name: Nova Bot 24/7
+name: QBJBXSANFHKEMVNAOCLMBPVQ Bot 24/7
 
 on:
   schedule:
@@ -19,7 +19,7 @@ on:
   workflow_dispatch: {}
 
 concurrency:
-  group: nova-bot
+  group: qbjbxsanfhkemvnaoclmbpvq
   cancel-in-progress: false
 
 permissions:

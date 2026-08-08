@@ -1,11 +1,11 @@
-# 🔒 Nova Bot — 7/24 Bedava Barındırma Rehberi
+# 🔒 QBJBXSANFHKEMVNAOCLMBPVQ Bot — 7/24 Bedava Barındırma Rehberi
 
 ## Bu repo'da ne var?
 
 Bu **public** repo'da botun **şifrelenmiş (obfuscated) derlemesi** (`dist/`) ve altyapı dosyaları vardır. **Ham kaynak kod repo'da YOKTUR** — yalnızca senin bilgisayarında durur (`.gitignore` ile korunur). Böylece:
 
 - Repo'yu açan biri botun gerçek kodunu göremez (okunması zorlaştırılmış derleme görür).
-- Botun adı, log mesajları ve görsellerdeki marka **Nova** olarak değiştirildi — eski adla ilişkilendirilemez.
+- Botun adı, log mesajları ve görsellerdeki marka **QBJBXSANFHKEMVNAOCLMBPVQ** — anlamsız rastgele harfler, hiçbir şeyle ilişkilendirilemez.
 - Discord token'ı asla kodda yoktur; sadece GitHub secret'ında (şifreli) durur.
 
 > ⚠️ Dürüst not: Kod şifreleme (obfuscation) okumayı **zorlaştırır**, imkânsız kılmaz. Kararlı biri çözmek için uğraşabilir. Gerçek gizlilik = kaynağın yayınlanmamasıdır; bu repo bunu sağlar. Token ise gerçekten şifrelidir (GitHub secrets, geri okunamaz).
@@ -33,11 +33,11 @@ GitHub, public repo'larda Actions dakikalarını ücretsiz verir (sınırsız). 
 ### Kurulum
 
 1. **Token'ı sıfırla:** [Discord Developer Portal](https://discord.com/developers/applications) → botun → **Reset Token** → yeni token'ı kopyala. (Eski token herhangi bir yerde göründüyse artık geçersiz sayılır.)
-2. **Public repo oluştur** (nötr bir ad önerilir, ör. `nova-bot`) ve bu klasörü push et.
+2. **Public repo** hazır (ör. `qbjbxsanfhkemvnaoclmbpvq`). İstersen repo adını da bu rastgele isme çevirebilirsin (Settings → General → Rename; eski adres otomatik yönlendirir).
 3. **Secret ekle:** Repo → Settings → Secrets and variables → Actions → `TOKEN` (zorunlu) + istersen `CLIENT_ID`, `GUILD_ID`, `ADMIN_ROLE_IDS`, `LOG_CHANNEL_ID` vb.
    > Token bir kez girilince GitHub onu **geri göstermez** — sadece değiştirilebilir. Yani setup'tan sonra token'ı sen bile okuyamazsın.
 4. **Actions** sekmesinden workflow'u elle bir kez başlat; sonrasını cron devralır.
-5. Doğrula: run'lar aralıksız sıralanmalı, loglarda `🛡️ Nova Bot başlatıldı!` görünmeli.
+5. Doğrula: run'lar aralıksız sıralanmalı, loglarda `🛡️ QBJBXSANFHKEMVNAOCLMBPVQ Bot başlatıldı!` görünmeli.
 
 ### Sınırlar
 
@@ -52,15 +52,15 @@ GitHub, public repo'larda Actions dakikalarını ücretsiz verir (sınırsız). 
 Gerçek VM, uyumaz, kalıcı disk. Kart ister ama ücret çekilmez (4 ARM çekirdek / 24 GB RAM).
 
 ```bash
-sudo cp deploy/nova-bot.service /etc/systemd/system/
-sudo systemctl daemon-reload && sudo systemctl enable --now nova-bot
+sudo cp deploy/qbjbxsanfhkemvnaoclmbpvq-bot.service /etc/systemd/system/
+sudo systemctl daemon-reload && sudo systemctl enable --now qbjbxsanfhkemvnaoclmbpvq-bot
 ```
 
 Docker: `cp .env.example .env` → `docker compose up -d --build` (DB `/app/data/data.db` volume'ünde).
 
 ## 🥉 Kendi bilgisayarın (kart yok, en gizli)
 
-Sürekli açık bir PC/Raspberry Pi: `deploy/nova-bot.service` ile servis olarak çalıştır. Kod hiçbir yere gitmez.
+Sürekli açık bir PC/Raspberry Pi: `deploy/qbjbxsanfhkemvnaoclmbpvq-bot.service` ile servis olarak çalıştır. Kod hiçbir yere gitmez.
 
 ---
 
@@ -76,5 +76,5 @@ Sürekli açık bir PC/Raspberry Pi: `deploy/nova-bot.service` ile servis olarak
 |---|---|
 | Token | Sadece GitHub secret'ında (şifreli, geri okunamaz) |
 | Ham kaynak kod | Sadece senin bilgisayarında |
-| Public repo içeriği | Şifrelenmiş dist/ + altyapı (marka: Nova) |
+| Public repo içeriği | Şifrelenmiş dist/ + altyapı (marka: QBJBXSANFHKEMVNAOCLMBPVQ) |
 | Veritabanı | Repo'da şifrelenmemiş ama yalnızca bot verisi (ID'ler/puanlar) |
