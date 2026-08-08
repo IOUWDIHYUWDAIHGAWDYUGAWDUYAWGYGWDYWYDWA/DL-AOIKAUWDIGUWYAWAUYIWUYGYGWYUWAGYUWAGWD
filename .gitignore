@@ -18,5 +18,6 @@ data.db
 /events/
 /utils/
 
-# dist içindeki çalışma zamanı dosyaları
+# dist içindeki çalışma zamanı dosyaları — veri repo'ya ASLA girmez
 /dist/data.db
+/dist/data.db.enc

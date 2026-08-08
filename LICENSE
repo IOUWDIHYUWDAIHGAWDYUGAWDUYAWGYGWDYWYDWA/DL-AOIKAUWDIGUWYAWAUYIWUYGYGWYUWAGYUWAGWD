@@ -1,0 +1,49 @@
+ALL RIGHTS RESERVED — KULLANIM VE KOPYALAMA YASAKTIR
+
+Copyright © 2026 QBJBXSANFHKEMVNAOCLMBPVQ (nova-bot) sahibi.
+
+Bu depodaki tüm kod, şifrelenmiş derleme (dist/), yapılandırma ve altyapı
+dosyaları yalnızca sahibine aittir. Aşağıdakiler, sahibinin önceden yazılı
+izni olmadan YASAKTIR:
+
+- Depoyu, kodu veya herhangi bir parçasını kopyalamak, çoğaltmak, dağıtmak,
+  yayınlamak veya alt lisanslamak;
+- Kodu (şifreli veya deşifre edilmiş hâliyle) çalıştırmak, barındırmak veya
+  herhangi bir hizmette kullanmak;
+- Kodu değiştirmek, tersine mühendislik yapmak, deobfuscate etmek veya türev
+  işler oluşturmak;
+- Bu depodaki verileri (üye kimlikleri, puanlar, uyarılar dâhil) herhangi bir
+  amaçla toplamak veya kullanmak.
+
+Bu depo GitHub'da herkese açık (public) olarak barındırılsa bile, bu durum
+kullanım, kopyalama veya dağıtım izni VERMEZ; yalnızca sahibinin 7/24 ücretsiz
+barındırma amacıyla seçtiği bir dağıtım yöntemidir.
+
+İzin talepleri ve lisanslama için depo sahibine başvurun.
+
+Bu lisans, geçerli telif hakkı kanunlarının sağladığı tüm hakları saklı tutar.
+
+---
+
+ALL RIGHTS RESERVED — NO USE OR COPYING PERMITTED
+
+Copyright © 2026 Owner of QBJBXSANFHKEMVNAOCLMBPVQ (nova-bot).
+
+All code, the obfuscated build (dist/), configuration and infrastructure files
+in this repository are the exclusive property of the owner. Without the owner's
+prior written permission, the following are PROHIBITED:
+
+- Copying, reproducing, distributing, publishing or sublicensing the repository,
+  the code, or any part of it;
+- Running, hosting or using the code (obfuscated or deobfuscated) in any service;
+- Modifying, reverse-engineering, deobfuscating, or creating derivative works;
+- Collecting or using any data in this repository (including member IDs, points
+  and warnings) for any purpose.
+
+Although this repository is hosted publicly on GitHub, public hosting does NOT
+grant permission to use, copy or distribute it; it is simply the distribution
+method the owner chose for free 24/7 hosting.
+
+Contact the repository owner for permission and licensing requests.
+
+This license reserves all rights provided by applicable copyright law.

@@ -28,13 +28,14 @@ Bot her yerde `dist/index.js`'ten çalışır (`npm start`), kaynaktan çalışt
 GitHub, public repo'larda Actions dakikalarını ücretsiz verir (sınırsız). `.github/workflows/bot.yml` hazır:
 
 - Cron her 10 dakikada bir tetikler; `concurrency` kuyruğu sayesinde bot ~5.8 saatlik işler halinde **kesintisiz** koşar (tek iş limiti 6 saattir).
-- `dist/data.db` her 5 dakikada bir commit edilir → veri kaybı ≤5 dk, ayrıca repo aktivitesi cron'u 60 gün kuralından korur.
+- Veritabanı her 5 dakikada bir **şifrelenip SADECE Telegram'a** yüklenir (veri kaybı ≤5 dk). Repo'ya veri düşmez; yalnızca son yedeğin işaretçisi (`.backup-ref.json`) commit edilir — bu push aynı zamanda botu ayakta tutan tetikleyicidir.
 
 ### Kurulum
 
 1. **Token'ı sıfırla:** [Discord Developer Portal](https://discord.com/developers/applications) → botun → **Reset Token** → yeni token'ı kopyala. (Eski token herhangi bir yerde göründüyse artık geçersiz sayılır.)
 2. **Public repo** hazır (ör. `qbjbxsanfhkemvnaoclmbpvq`). İstersen repo adını da bu rastgele isme çevirebilirsin (Settings → General → Rename; eski adres otomatik yönlendirir).
-3. **Secret ekle:** Repo → Settings → Secrets and variables → Actions → `TOKEN` (zorunlu) + istersen `CLIENT_ID`, `GUILD_ID`, `ADMIN_ROLE_IDS`, `LOG_CHANNEL_ID` vb.
+3. **Secret ekle:** Repo → Settings → Secrets and variables → Actions → `TOKEN` (zorunlu) + `DB_KEY` (zorunlu — veritabanı şifresi) + istersen `CLIENT_ID`, `GUILD_ID`, `ADMIN_ROLE_IDS`, `LOG_CHANNEL_ID`, `TELEGRAM_TOKEN`, `TELEGRAM_CHAT_ID` (Telegram yedeği, aşağıya bak) vb.
+   > `DB_KEY` üretmek için: `node scripts/db-crypto.js keygen` (64 hex karakter çıkarır, bu çıktıyı secret'a yapıştır).
    > Token bir kez girilince GitHub onu **geri göstermez** — sadece değiştirilebilir. Yani setup'tan sonra token'ı sen bile okuyamazsın.
 4. **Actions** sekmesinden workflow'u elle bir kez başlat; sonrasını cron devralır.
 5. Doğrula: run'lar aralıksız sıralanmalı, loglarda başlatma mesajı görünmeli.
@@ -66,9 +67,28 @@ Sürekli açık bir PC/Raspberry Pi: `deploy/qbjbxsanfhkemvnaoclmbpvq-bot.servic
 
 ## 🗄️ Veritabanı
 
-- Dosya adı: `data.db`.
-- 30 saniyede bir kaydedilir; GitHub Actions'ta 5 dakikada bir repo'ya commit edilir.
-- Docker'da `/app/data/data.db` (kalıcı volume). Kendi makinende çalışma dizininde durur.
+- Dosya adı: `data.db` — **repo'da HİÇ tutulmaz** (ne düz ne şifreli).
+- 30 saniyede bir diske kaydedilir; her 5 dakikada bir **şifrelenip (AES-256-GCM, `DB_KEY`) Telegram'a** yüklenir.
+- Repo'ya yalnızca son yedeğin Telegram `file_id` işaretçisi (`.backup-ref.json`) işlenir — bu bir veri değildir; klonlayan biri hiçbir şey okuyamaz.
+- Runner'lar geçici olduğu için her run başında DB **Telegram'dan indirilip çözülür** (`node scripts/db-restore.js`). Referans yoksa (ilk çalıştırma) mevcut `dist/data.db` ile devam edilir ve ilk 5 dk'da Telegram'a yüklenir.
+- Docker'da `/app/data/data.db` (kalıcı volume). Kendi makinende çalışma dizininde durur (yerel `data.db` repoya gitmez).
+
+---
+
+## ☁️ Telegram yedeği (repo dışı, önerilir)
+
+Repo veya GitHub hesabı kaybedilirse (askıya alma, silme) şifreli DB de gider. Bu yüzden bot, her 5 dakikalık yedekte şifreli DB'yi (`data.db.enc`) ayrıca **Telegram'a** yükler: repo'dan bağımsız ikinci bir kopya, telefondan bile indirilebilir. Yedek `scripts/db-backup.js` tarafından yapılır — yeni bağımlılık gerekmez (Node 18+ yerleşik fetch).
+
+1. Telegram'da [@BotFather](https://t.me/BotFather) → `/newbot` → botunu oluştur, çıkan token'ı kopyala (`TELEGRAM_TOKEN`).
+2. Botu **özel bir kanala** ekle (veya botla kendi sohbetini aç) ve bir mesaj yazdır.
+3. Sohbet ID'sini bul: tarayıcıda `https://api.telegram.org/bot<TOKEN>/getUpdates` aç; mesajının `"chat":{"id":...}` alanındaki sayıyı kopyala. Özel kanal ID'si genelde `-100...` ile başlar (`TELEGRAM_CHAT_ID`).
+4. GitHub → Settings → Secrets and variables → Actions → `TELEGRAM_TOKEN` ve `TELEGRAM_CHAT_ID` ekle.
+
+Başka yerde de çalıştırılabilir (Docker, systemd, cron):
+
+```bash
+TELEGRAM_TOKEN=... TELEGRAM_CHAT_ID=... node scripts/db-backup.js
+```
 
 ## 🔐 Güvenlik özeti
 
@@ -77,4 +97,4 @@ Sürekli açık bir PC/Raspberry Pi: `deploy/qbjbxsanfhkemvnaoclmbpvq-bot.servic
 | Token | Sadece GitHub secret'ında (şifreli, geri okunamaz) |
 | Ham kaynak kod | Sadece senin bilgisayarında |
 | Public repo içeriği | Şifrelenmiş dist/ + altyapı; botun gerçek adı düz metin olarak YOK |
-| Veritabanı | Repo'da şifrelenmemiş ama yalnızca bot verisi (ID'ler/puanlar) |
+| Veritabanı | Repo'da YOK — yalnızca Telegram'da şifreli (AES-256); repo'da sadece son yedeğin file_id işaretçisi |
