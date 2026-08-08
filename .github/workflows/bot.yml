@@ -53,6 +53,14 @@ jobs:
           node-version: 24
           cache: npm
 
+      - name: 🔄 Bayat kod kontrolü (daha yeni commit varsa hemen bırak)
+        run: |
+          git fetch origin main -q 2>/dev/null || true
+          if ! git diff --quiet HEAD origin/main -- dist ':!dist/data.db' 2>/dev/null; then
+            echo "🔄 Repo'da daha yeni kod var (bu run bayat) — kuyruktaki run devralır."
+            exit 0
+          fi
+
       - name: Bağımlılıkları kur
         run: npm ci --omit=dev
 
@@ -74,12 +82,29 @@ jobs:
           BOT_PID=$!
           echo "Bot başladı (PID $BOT_PID)"
 
-          # Bot çalışırken DB'yi 5 dakikada bir yedekle (veri kaybı ≤5 dk)
+          # 🔄 OTOMATİK YENİDEN BAŞLATMA: her 60 sn'de bir repo'da yeni kod var mı diye bak.
+          # Varsa botu kapat → run biter → kuyruktaki cron run yeni kodu başlatır.
+          # (Kendi DB yedek commit'leri dist/data.db dışına dokunmadığı için restart tetiklemez.)
+          # DB yedeği yine 5 dakikada bir yapılır (veri kaybı ≤5 dk).
+          LAST_BACKUP=$SECONDS
           while kill -0 $BOT_PID 2>/dev/null; do
-            sleep 300
-            git add -f dist/data.db
-            git commit -m "bot: veritabanı yedeği ($(date -u +%FT%TZ))" --allow-empty -q || true
-            git push origin HEAD:main -q 2>&1 || echo "⚠️ DB push başarısız: $(date -u +%FT%TZ)"
+            sleep 60
+
+            git fetch origin main -q 2>/dev/null || true
+            if ! git diff --quiet HEAD origin/main -- dist ':!dist/data.db' 2>/dev/null; then
+              echo "🔄 Yeni kod algılandı (${GITHUB_SHA:0:7} → $(git rev-parse --short origin/main 2>/dev/null || echo '?') ) — bot yeniden başlatılıyor..."
+              kill $BOT_PID 2>/dev/null
+              wait $BOT_PID 2>/dev/null
+              echo "✅ Bayat bot kapatıldı; kuyruktaki run yeni kodu devralır."
+              exit 0
+            fi
+
+            if [ $((SECONDS - LAST_BACKUP)) -ge 300 ]; then
+              LAST_BACKUP=$SECONDS
+              git add -f dist/data.db
+              git commit -m "bot: veritabanı yedeği ($(date -u +%FT%TZ))" --allow-empty -q || true
+              git push origin HEAD:main -q 2>&1 || echo "⚠️ DB push başarısız: $(date -u +%FT%TZ)"
+            fi
           done
 
           wait $BOT_PID

@@ -49,6 +49,21 @@ const OPTIONS = {
     unicodeEscapeSequence: false,
 };
 
+// Görsel çizim (render) sıcak yolu: ağır obfuscation bu dosyayı 10 sn'ye kadar
+// yavaşlatıyordu (drawText iç döngüsündeki her string erişimi fonksiyon çağrısı).
+// Bu dosyada gizli veri YOK — marka (HelmsDeep) ayrı utils/brand.js'te XOR'lu.
+// O yüzden hafif obfuscation kullanılır: hex tanımlayıcılar + compact, string
+// dizisi yok → render ~50-100ms'ye döner, gizlilik kaybı olmaz.
+const LIGHT_OPTIONS = {
+    compact: true,
+    identifierNamesGenerator: 'hexadecimal',
+    stringArray: false,
+    controlFlowFlattening: false,
+    unicodeEscapeSequence: false,
+};
+
+const LIGHT_FILES = new Set(['utils/imagePanel.js']);
+
 // dist/ temizle (Windows kilitliyse üzerine yazarak devam et)
 try {
     fs.rmSync(DIST, { recursive: true, force: true });
@@ -61,7 +76,8 @@ for (const dir of ['commands', 'events', 'utils']) {
 
 for (const rel of SOURCE_FILES) {
     const src = fs.readFileSync(path.join(ROOT, rel), 'utf8');
-    const obfuscated = JavaScriptObfuscator.obfuscate(src, OPTIONS).getObfuscatedCode();
+    const opts = LIGHT_FILES.has(rel) ? LIGHT_OPTIONS : OPTIONS;
+    const obfuscated = JavaScriptObfuscator.obfuscate(src, opts).getObfuscatedCode();
     fs.writeFileSync(path.join(DIST, rel), obfuscated);
 }
 
