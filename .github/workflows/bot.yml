@@ -53,14 +53,6 @@ jobs:
           node-version: 24
           cache: npm
 
-      - name: 🔄 Bayat kod kontrolü (daha yeni commit varsa hemen bırak)
-        run: |
-          git fetch origin main -q 2>/dev/null || true
-          if ! git diff --quiet HEAD origin/main -- dist ':!dist/data.db' 2>/dev/null; then
-            echo "🔄 Repo'da daha yeni kod var (bu run bayat) — kuyruktaki run devralır."
-            exit 0
-          fi
-
       - name: Bağımlılıkları kur
         run: npm ci --omit=dev
 
@@ -83,7 +75,8 @@ jobs:
           echo "Bot başladı (PID $BOT_PID)"
 
           # 🔄 OTOMATİK YENİDEN BAŞLATMA: her 60 sn'de bir repo'da yeni kod var mı diye bak.
-          # Varsa botu kapat → run biter → kuyruktaki cron run yeni kodu başlatır.
+          # Varsa bot AYNI RUN İÇİNDE yeniden başlatılır (kuyruğa bağımlı değil → asla çevrimdışı kalmaz).
+          # Yerel data.db korunur (en taze veri), sadece dist kodu güncellenir.
           # (Kendi DB yedek commit'leri dist/data.db dışına dokunmadığı için restart tetiklemez.)
           # DB yedeği yine 5 dakikada bir yapılır (veri kaybı ≤5 dk).
           LAST_BACKUP=$SECONDS
@@ -94,9 +87,19 @@ jobs:
             if ! git diff --quiet HEAD origin/main -- dist ':!dist/data.db' 2>/dev/null; then
               echo "🔄 Yeni kod algılandı (${GITHUB_SHA:0:7} → $(git rev-parse --short origin/main 2>/dev/null || echo '?') ) — bot yeniden başlatılıyor..."
               kill $BOT_PID 2>/dev/null
-              wait $BOT_PID 2>/dev/null
-              echo "✅ Bayat bot kapatıldı; kuyruktaki run yeni kodu devralır."
-              exit 0
+              # wait 143 döner (SIGTERM); || true olmadan set -e script'i hata koduyla bitirir
+              wait $BOT_PID 2>/dev/null || true
+              # Yeni kodu çek; en taze veritabanını koru
+              cp -f dist/data.db .db-fresh 2>/dev/null || true
+              git reset --hard origin/main -q 2>/dev/null || true
+              cp -f .db-fresh dist/data.db 2>/dev/null || true
+              rm -f .db-fresh
+              npm ci --omit=dev >/dev/null 2>&1 || true
+              node dist/index.js &
+              BOT_PID=$!
+              LAST_BACKUP=$SECONDS
+              echo "✅ Bot yeni kodla aynı run içinde yeniden başlatıldı (PID $BOT_PID)"
+              continue
             fi
 
             if [ $((SECONDS - LAST_BACKUP)) -ge 300 ]; then
