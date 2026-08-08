@@ -1,0 +1,21 @@
+{
+  "name": "nova-bot",
+  "version": "1.0.0",
+  "description": "Nova Klan Yetkili & Puan Sistemi Discord Botu",
+  "main": "dist/index.js",
+  "scripts": {
+    "obfuscate": "node scripts/obfuscate.js",
+    "start": "node dist/index.js",
+    "dev": "node index.js",
+    "deploy": "node dist/deploy-commands.js"
+  },
+  "dependencies": {
+    "@discordjs/voice": "^0.18.0",
+    "discord.js": "^14.16.3",
+    "node-cron": "^3.0.3",
+    "sql.js": "^1.11.0"
+  },
+  "devDependencies": {
+    "javascript-obfuscator": "^4.2.2"
+  }
+}

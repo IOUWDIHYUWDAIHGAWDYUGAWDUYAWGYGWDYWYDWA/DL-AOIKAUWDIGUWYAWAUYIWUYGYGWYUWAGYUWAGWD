@@ -1,0 +1,83 @@
+# Nova Bot — 7/24 ücretsiz barındırma (kredi kartı gerekmez)
+#
+# Nasıl çalışır:
+#  - Public repo'daki GitHub Actions dakikaları ücretsizdir (sınırsız).
+#  - Cron her 10 dakikada bir tetikler; "concurrency" sayesinde bir önceki
+#    çalışma bitmeden yenisi BAŞLAMAZ, kuyrukta bekler. Böylece bot ~5.8 saatlik
+#    job'lar halinde kesintisiz koşar (GitHub job limiti 6 saattir).
+#  - Veritabanı (dist/data.db) her 5 dakikada bir commit edilir; hem veri kaybı
+#    ≤5 dakikada kalır hem de repo aktivitesi cron'u 60 gün kuralından korur.
+#
+# Kurulum: DEPLOY.md'deki "Kredi kartı gerektirmeyen" bölümüne bak.
+# Gerekli repo secret'ları: TOKEN, CLIENT_ID, GUILD_ID (+ isteğe bağlı diğerleri)
+
+name: Nova Bot 24/7
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch: {}
+
+concurrency:
+  group: nova-bot
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  bot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    env:
+      # Değerler repo Secrets'ından gelir; eksik olanlar config.json'a düşer.
+      TOKEN: ${{ secrets.TOKEN }}
+      CLIENT_ID: ${{ secrets.CLIENT_ID }}
+      GUILD_ID: ${{ secrets.GUILD_ID }}
+      REQUIRED_ROLE_ID: ${{ secrets.REQUIRED_ROLE_ID }}
+      ADMIN_ROLE_IDS: ${{ secrets.ADMIN_ROLE_IDS }}
+      ADMIN_USER_IDS: ${{ secrets.ADMIN_USER_IDS }}
+      RANK_CONTROL_ROLE_ID: ${{ secrets.RANK_CONTROL_ROLE_ID }}
+      FOUNDER_USER_IDS: ${{ secrets.FOUNDER_USER_IDS }}
+      LOG_CHANNEL_ID: ${{ secrets.LOG_CHANNEL_ID }}
+      STAY_VOICE_CHANNEL_ID: ${{ secrets.STAY_VOICE_CHANNEL_ID }}
+      WARNING_ROLES: ${{ secrets.WARNING_ROLES }}
+      BLACKLIST_ROLE_ID: ${{ secrets.BLACKLIST_ROLE_ID }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Bağımlılıkları kur
+        run: npm ci --omit=dev
+
+      - name: 🔐 Sızıntı taraması (token repo'ya sızmışsa dur)
+        run: node scripts/check-secrets.js
+
+      - name: Slash komutlarını eşitle
+        run: node dist/deploy-commands.js
+
+      - name: Botu çalıştır + veritabanını commit et
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+
+          node dist/index.js &
+          BOT_PID=$!
+          echo "Bot başladı (PID $BOT_PID)"
+
+          # Bot çalışırken DB'yi 5 dakikada bir yedekle (veri kaybı ≤5 dk)
+          while kill -0 $BOT_PID 2>/dev/null; do
+            sleep 300
+            git add -f dist/data.db
+            git commit -m "bot: veritabanı yedeği ($(date -u +%FT%TZ))" --allow-empty -q || true
+            git push -q || true
+          done
+
+          wait $BOT_PID

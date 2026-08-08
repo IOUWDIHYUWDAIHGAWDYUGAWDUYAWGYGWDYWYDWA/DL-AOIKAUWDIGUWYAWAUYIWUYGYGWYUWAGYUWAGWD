@@ -1,0 +1,22 @@
+node_modules/
+.env
+data.db
+*.log
+
+# Freebuff uygulama verisi (konuşma geçmişi) — asla push edilmez
+.freebuff/
+
+# ── Ham kaynak kod: public repo'ya GİRMEZ ──
+# Repo'da yalnızca dist/ (şifrelenmiş derleme) bulunur.
+# Kaynak değişince: npm run obfuscate && git add dist && git commit
+/index.js
+/config.js
+/config.json
+/database.js
+/deploy-commands.js
+/commands/
+/events/
+/utils/
+
+# dist içindeki çalışma zamanı dosyaları
+/dist/data.db

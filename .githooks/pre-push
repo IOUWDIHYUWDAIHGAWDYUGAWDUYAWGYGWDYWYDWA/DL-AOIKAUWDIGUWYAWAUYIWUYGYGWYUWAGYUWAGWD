@@ -1,0 +1,9 @@
+#!/bin/sh
+# 🔐 Her push'tan önce token sızıntı taraması yapar.
+# Etkinleştirmek için (repo kökünde):
+#   git config core.hooksPath .githooks
+# (Ya da bu dosyayı .git/hooks/pre-push olarak kopyala.)
+node scripts/check-secrets.js || {
+    echo "❌ Push engellendi: sızıntı taraması başarısız."
+    exit 1
+}

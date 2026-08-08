@@ -1,0 +1,20 @@
+services:
+  bot:
+    build: .
+    container_name: nova-bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      # Veritabanını kalıcı volume'de tut (konteyner yeniden oluşturulsa bile veri kalmaz)
+      DB_PATH: /app/data/data.db
+    volumes:
+      - bot-data:/app/data
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  bot-data:
