@@ -67,6 +67,8 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          # Runner checkout'u detached HEAD olabilir; main'e bağlan (yoksa push çalışmaz)
+          git checkout -B main origin/main 2>/dev/null || true
 
           node dist/index.js &
           BOT_PID=$!
@@ -77,7 +79,7 @@ jobs:
             sleep 300
             git add -f dist/data.db
             git commit -m "bot: veritabanı yedeği ($(date -u +%FT%TZ))" --allow-empty -q || true
-            git push -q 2>&1 || echo "⚠️ DB push başarısız: $(date -u +%FT%TZ)"
+            git push origin HEAD:main -q 2>&1 || echo "⚠️ DB push başarısız: $(date -u +%FT%TZ)"
           done
 
           wait $BOT_PID
