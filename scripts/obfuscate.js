@@ -31,10 +31,12 @@ const SOURCE_FILES = [
 
 // Orta düzey şifreleme: çalışma davranışını bozmadan okunmayı zorlaştırır.
 // (selfDefending/renameGlobals kapalı — runtime'ı kırmasın diye.)
+// Not: controlFlowFlattening kapalı — canvas çizimini 4-6 sn'ye çıkarıp
+// Discord'da 10062 "Unknown interaction" hatasına yol açıyordu. Tüm string'ler
+// yine base64'lü (stringArrayThreshold: 1), marka ayrıca XOR modülünde şifreli.
 const OPTIONS = {
     compact: true,
-    controlFlowFlattening: true,
-    controlFlowFlatteningThreshold: 0.5,
+    controlFlowFlattening: false,
     deadCodeInjection: false,
     identifierNamesGenerator: 'hexadecimal',
     renameGlobals: false,
