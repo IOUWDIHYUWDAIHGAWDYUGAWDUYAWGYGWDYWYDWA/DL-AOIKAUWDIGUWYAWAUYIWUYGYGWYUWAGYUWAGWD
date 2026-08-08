@@ -26,7 +26,8 @@ const { decryptBuffer } = require('./db-crypto');
 const REF_PATH = process.env.BACKUP_REF_PATH || path.join(__dirname, '..', '.backup-ref.json');
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, '..', 'dist', 'data.db');
 const LEGACY_PATH = process.env.LEGACY_DB_PATH || path.join(__dirname, '..', 'dist', 'data.db.enc');
-const TOKEN = process.env.TELEGRAM_TOKEN;
+// Trim: GitHub secret'ına kopyalarken satır sonu/boşluk yapışırsa token bozulur
+const TOKEN = (process.env.TELEGRAM_TOKEN || '').trim();
 
 function fail(msg) {
     console.error(`🚨 ${msg}`);

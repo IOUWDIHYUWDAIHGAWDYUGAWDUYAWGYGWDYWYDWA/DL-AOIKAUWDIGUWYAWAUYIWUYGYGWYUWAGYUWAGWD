@@ -29,8 +29,9 @@ const { encryptToBuffer } = require('./db-crypto');
 
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, '..', 'dist', 'data.db');
 const REF_PATH = process.env.BACKUP_REF_PATH || path.join(__dirname, '..', '.backup-ref.json');
-const TOKEN = process.env.TELEGRAM_TOKEN;
-const CHAT_ID = process.env.TELEGRAM_CHAT_ID;
+// Trim: GitHub secret'ına kopyalarken satır sonu/boşluk yapışırsa token bozulur
+const TOKEN = (process.env.TELEGRAM_TOKEN || '').trim();
+const CHAT_ID = (process.env.TELEGRAM_CHAT_ID || '').trim();
 // Son yüklenen verinin hash'i — her platformda gerçek geçici klasör (Linux: /tmp)
 const STATE_FILE = path.join(os.tmpdir(), 'db-backup-last-hash');
 
@@ -111,5 +112,7 @@ async function main() {
 
 main().catch((err) => {
     console.error(`🚨 Telegram yedeği başarısız: ${err.message}`);
+    console.error('   İpucu: TELEGRAM_TOKEN / TELEGRAM_CHAT_ID GitHub secret\'larını kontrol et');
+    console.error('   (değerin başında/sonunda boşluk veya satır sonu olmasın).');
     process.exit(1);
 });

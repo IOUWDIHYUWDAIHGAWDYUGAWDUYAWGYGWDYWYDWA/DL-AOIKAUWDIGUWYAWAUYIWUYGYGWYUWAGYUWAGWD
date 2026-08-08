@@ -21,7 +21,8 @@ const IV_LEN = 12;
 const TAG_LEN = 16;
 
 function getKey() {
-    const hex = process.env.DB_KEY;
+    // Trim: GitHub secret'ına kopyalarken satır sonu/boşluk yapışırsa anahtar bozulur
+    const hex = (process.env.DB_KEY || '').trim();
     if (!hex) {
         console.error('🚨 DB_KEY ortam değişkeni gerekli (32 byte = 64 hex karakter).');
         console.error('   Üretmek için: node scripts/db-crypto.js keygen');

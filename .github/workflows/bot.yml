@@ -134,7 +134,9 @@ jobs:
               # 🔁 Kalp atışı + yedek işaretçisi: repo'ya yalnızca son yedeğin
               # file_id'si işlenir (veri değil). Bu push, botu ayakta tutan
               # tetikleyicidir — cron, run in_progress iken atlanıyor.
-              git add .backup-ref.json
+              # 2>/dev/null || true: yedek başarısız olursa referans dosyası yoktur;
+              # kalp atışı yine de push edilmeli (yoksa bot run sonunda ölür).
+              git add .backup-ref.json 2>/dev/null || true
               git commit -m "bot: kalp atışı + yedek referansı ($(date -u +%FT%TZ))" --allow-empty -q || true
               git push origin HEAD:main -q 2>&1 || echo "⚠️ push başarısız: $(date -u +%FT%TZ)"
             fi
