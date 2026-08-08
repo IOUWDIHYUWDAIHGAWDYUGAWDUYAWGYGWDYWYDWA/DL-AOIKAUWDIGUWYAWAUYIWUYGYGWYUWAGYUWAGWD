@@ -5,7 +5,7 @@
 Bu **public** repo'da botun **şifrelenmiş (obfuscated) derlemesi** (`dist/`) ve altyapı dosyaları vardır. **Ham kaynak kod repo'da YOKTUR** — yalnızca senin bilgisayarında durur (`.gitignore` ile korunur). Böylece:
 
 - Repo'yu açan biri botun gerçek kodunu göremez (okunması zorlaştırılmış derleme görür).
-- Botun adı, log mesajları ve görsellerdeki marka **QBJBXSANFHKEMVNAOCLMBPVQ** — anlamsız rastgele harfler, hiçbir şeyle ilişkilendirilemez.
+- Botun gerçek markası kod içinde **şifreli** tutulur (çalışma anında XOR ile çözülür) — repo'da aratılsa bile düz metin olarak bulunamaz.
 - Discord token'ı asla kodda yoktur; sadece GitHub secret'ında (şifreli) durur.
 
 > ⚠️ Dürüst not: Kod şifreleme (obfuscation) okumayı **zorlaştırır**, imkânsız kılmaz. Kararlı biri çözmek için uğraşabilir. Gerçek gizlilik = kaynağın yayınlanmamasıdır; bu repo bunu sağlar. Token ise gerçekten şifrelidir (GitHub secrets, geri okunamaz).
@@ -37,7 +37,7 @@ GitHub, public repo'larda Actions dakikalarını ücretsiz verir (sınırsız). 
 3. **Secret ekle:** Repo → Settings → Secrets and variables → Actions → `TOKEN` (zorunlu) + istersen `CLIENT_ID`, `GUILD_ID`, `ADMIN_ROLE_IDS`, `LOG_CHANNEL_ID` vb.
    > Token bir kez girilince GitHub onu **geri göstermez** — sadece değiştirilebilir. Yani setup'tan sonra token'ı sen bile okuyamazsın.
 4. **Actions** sekmesinden workflow'u elle bir kez başlat; sonrasını cron devralır.
-5. Doğrula: run'lar aralıksız sıralanmalı, loglarda `🛡️ QBJBXSANFHKEMVNAOCLMBPVQ Bot başlatıldı!` görünmeli.
+5. Doğrula: run'lar aralıksız sıralanmalı, loglarda başlatma mesajı görünmeli.
 
 ### Sınırlar
 
@@ -76,5 +76,5 @@ Sürekli açık bir PC/Raspberry Pi: `deploy/qbjbxsanfhkemvnaoclmbpvq-bot.servic
 |---|---|
 | Token | Sadece GitHub secret'ında (şifreli, geri okunamaz) |
 | Ham kaynak kod | Sadece senin bilgisayarında |
-| Public repo içeriği | Şifrelenmiş dist/ + altyapı (marka: QBJBXSANFHKEMVNAOCLMBPVQ) |
+| Public repo içeriği | Şifrelenmiş dist/ + altyapı; botun gerçek adı düz metin olarak YOK |
 | Veritabanı | Repo'da şifrelenmemiş ama yalnızca bot verisi (ID'ler/puanlar) |
