@@ -29,12 +29,13 @@ function getKey() {
         console.error('   Sonra GitHub repo secret\'larına DB_KEY olarak ekle.');
         process.exit(1);
     }
-    const key = Buffer.from(hex, 'hex');
-    if (key.length !== 32) {
-        console.error('🚨 DB_KEY 64 hex karakter olmalı (32 byte AES-256 anahtarı).');
+    if (!/^[0-9a-fA-F]{64}$/.test(hex)) {
+        console.error('🚨 DB_KEY geçersiz: tam olarak 64 hex karakter olmalı (0-9a-f, 32 byte AES-256 anahtarı).');
+        console.error('   Üretmek için: node scripts/db-crypto.js keygen');
+        console.error('   Sonra GitHub → Settings → Secrets and variables → Actions → DB_KEY olarak ekle.');
         process.exit(1);
     }
-    return key;
+    return Buffer.from(hex, 'hex');
 }
 
 // Şifreli veriyi dosyaya yazmadan buffer olarak üretir. db-backup.js gibi harici

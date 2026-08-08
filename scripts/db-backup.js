@@ -72,8 +72,11 @@ async function upload(buffer, filename) {
 }
 
 async function main() {
-    if (!TOKEN || !CHAT_ID) {
-        fail('🚨 TELEGRAM_TOKEN ve TELEGRAM_CHAT_ID ortam değişkenleri gerekli.');
+    if (!TOKEN || !/^\d+:[A-Za-z0-9_-]{30,40}$/.test(TOKEN)) {
+        fail('🚨 TELEGRAM_TOKEN geçersiz: bir Telegram bot token\'ı "123456:ABC...xy" biçiminde olmalı.\n   GitHub → Settings → Secrets and variables → Actions → TELEGRAM_TOKEN değerini kontrol et.');
+    }
+    if (!CHAT_ID || !/^(-?\d+|@[\w-]+)$/.test(CHAT_ID)) {
+        fail('🚨 TELEGRAM_CHAT_ID geçersiz: sayısal ID olmalı (örn. 123456789 veya -1001234).\n   GitHub → Settings → Secrets and variables → Actions → TELEGRAM_CHAT_ID değerini kontrol et.');
     }
     if (!fs.existsSync(DB_PATH)) {
         fail(`🚨 Veritabanı bulunamadı: ${DB_PATH}`);

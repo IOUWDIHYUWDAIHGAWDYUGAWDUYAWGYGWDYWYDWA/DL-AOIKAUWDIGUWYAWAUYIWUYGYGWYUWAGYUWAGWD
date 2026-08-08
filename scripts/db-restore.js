@@ -59,7 +59,9 @@ async function api(pathname, attempts = 3) {
 }
 
 async function main() {
-    if (!TOKEN) fail('TELEGRAM_TOKEN ortam değişkeni gerekli.');
+    if (!TOKEN || !/^\d+:[A-Za-z0-9_-]{30,40}$/.test(TOKEN)) {
+        fail('TELEGRAM_TOKEN geçersiz: bir Telegram bot token\'ı "123456:ABC...xy" biçiminde olmalı.\n   GitHub → Settings → Secrets and variables → Actions → TELEGRAM_TOKEN değerini kontrol et.');
+    }
 
     // 2) Eski repo yedeğinden geçiş (referans henüz yokken)
     if (!fs.existsSync(REF_PATH)) {

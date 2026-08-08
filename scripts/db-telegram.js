@@ -248,7 +248,9 @@ async function handleCommand(text, db) {
 
 // ── Ana döngü (tek poll) ─────────────────────────────────────────────
 async function main() {
-    if (!TOKEN) fail('TELEGRAM_TOKEN ortam değişkeni gerekli.');
+    if (!TOKEN || !/^\d+:[A-Za-z0-9_-]{30,40}$/.test(TOKEN)) {
+        fail('TELEGRAM_TOKEN geçersiz: bir Telegram bot token\'ı "123456:ABC...xy" biçiminde olmalı.\n   GitHub → Settings → Secrets and variables → Actions → TELEGRAM_TOKEN değerini kontrol et.');
+    }
 
     let offset = 0;
     let firstPoll = true;
