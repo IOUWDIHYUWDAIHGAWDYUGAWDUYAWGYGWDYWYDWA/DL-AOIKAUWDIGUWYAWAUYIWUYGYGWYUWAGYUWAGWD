@@ -28,7 +28,7 @@ Bot her yerde `dist/index.js`'ten çalışır (`npm start`), kaynaktan çalışt
 GitHub, public repo'larda Actions dakikalarını ücretsiz verir (sınırsız). `.github/workflows/bot.yml` hazır:
 
 - Cron her 10 dakikada bir tetikler; `concurrency` kuyruğu sayesinde bot ~5.8 saatlik işler halinde **kesintisiz** koşar (tek iş limiti 6 saattir).
-- Veritabanı her **~40 saniyede bir** denetlenir; veri değiştiyse **şifrelenip SADECE Telegram'a** yüklenir (veri kaybı ≤~1 dk). Repo'ya veri düşmez; yalnızca son yedeğin işaretçisi (`.backup-ref.json`) commit edilir — kalp atışı push'u aynı zamanda botu ayakta tutan tetikleyicidir.
+- Veritabanı her **5 dakikada bir** denetlenir; veri değiştiyse **şifrelenip SADECE Telegram'a** yüklenir (veri kaybı ≤5 dk). Repo'ya veri düşmez; yalnızca son yedeğin işaretçisi (`.backup-ref.json`) commit edilir — kalp atışı push'u aynı zamanda botu ayakta tutan tetikleyicidir.
 
 ### Kurulum
 
@@ -68,7 +68,7 @@ Sürekli açık bir PC/Raspberry Pi: `deploy/qbjbxsanfhkemvnaoclmbpvq-bot.servic
 ## 🗄️ Veritabanı
 
 - Dosya adı: `data.db` — **repo'da HİÇ tutulmaz** (ne düz ne şifreli).
-- 30 saniyede bir diske kaydedilir; her **~40 saniyede bir** denetlenir ve veri değiştiyse **şifrelenip (AES-256-GCM, `DB_KEY`) Telegram'a** yüklenir.
+- 30 saniyede bir diske kaydedilir; her **5 dakikada bir** denetlenir ve veri değiştiyse **şifrelenip (AES-256-GCM, `DB_KEY`) Telegram'a** yüklenir.
 - Repo'ya yalnızca son yedeğin Telegram `file_id` işaretçisi (`.backup-ref.json`) işlenir — bu bir veri değildir; klonlayan biri hiçbir şey okuyamaz.
 - Runner'lar geçici olduğu için her run başında DB **Telegram'dan indirilip çözülür** (`node scripts/db-restore.js`). Referans yoksa (ilk çalıştırma) mevcut `dist/data.db` ile devam edilir ve ilk 5 dk'da Telegram'a yüklenir.
 - Docker'da `/app/data/data.db` (kalıcı volume). Kendi makinende çalışma dizininde durur (yerel `data.db` repoya gitmez).
