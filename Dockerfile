@@ -10,4 +10,4 @@ COPY . .
 
 ENV NODE_ENV=production
 
-CMD ["node", "index.js"]
+CMD ["node", "dist/index.js"]
