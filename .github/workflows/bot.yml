@@ -5,10 +5,13 @@
 #  - Cron her 10 dakikada bir tetikler; "concurrency" sayesinde bir önceki
 #    çalışma bitmeden yenisi BAŞLAMAZ, kuyrukta bekler. Böylece bot ~5.8 saatlik
 #    job'lar halinde kesintisiz koşar (GitHub job limiti 6 saattir).
-#  - Veritabanı repo'da HİÇ tutulmaz: her 5 dakikada bir ŞİFRELENİP (AES-256,
-#    DB_KEY) SADECE Telegram'a yüklenir. Repo'ya yalnızca son yedeğin file_id
-#    işaretçisi (.backup-ref.json) işlenir — repoyu klonlayan biri veri görmez.
-#    Her run başında DB, Telegram'dan indirilip çözülür (db-restore.js).
+#  - Veritabanı repo'da HİÇ tutulmaz: her ~40 saniyede bir denetlenir, veri
+#    değiştiyse ŞİFRELENİP (AES-256, DB_KEY) SADECE Telegram'a yüklenir.
+#    Repo'ya yalnızca son yedeğin file_id işaretçisi (.backup-ref.json) işlenir
+#    — repoyu klonlayan biri veri görmez. Her run başında DB, Telegram'dan
+#    indirilip çözülür (db-restore.js).
+#  - Telegram komutları (/durum, /top, /uye, /loglar, /uyarilar) aynı bot
+#    üzerinden veritabanını sorgular (db-telegram.js).
 #
 # Gerekli repo secret'ları: TOKEN, CLIENT_ID, GUILD_ID, DB_KEY,
 # TELEGRAM_TOKEN, TELEGRAM_CHAT_ID (DB yedek/geri yükleme)
@@ -89,7 +92,7 @@ jobs:
 
           # 🔓 Veritabanını geri yükle — repo'da veri YOK, DB Telegram'da durur.
           # İlk çalıştırmada referans yoksa checkout'taki mevcut dist/data.db
-          # kullanılır ve ilk 5 dk'da Telegram'a yüklenir.
+          # kullanılır ve ilk ~1 dk içinde Telegram'a yüklenir.
           # (Referans var ama geri yükleme başarısızsa run durur — boş DB ile
           # başlayıp iyi verinin üstüne yazmamak için.)
           node scripts/db-restore.js
@@ -98,14 +101,15 @@ jobs:
           BOT_PID=$!
           echo "Bot başladı (PID $BOT_PID)"
 
-          # 🔄 OTOMATİK YENİDEN BAŞLATMA: her 60 sn'de bir repo'da yeni kod var mı diye bak.
+          # 🔄 OTOMATİK YENİDEN BAŞLATMA: her 35 sn'de bir repo'da yeni kod var mı diye bak.
           # Varsa bot AYNI RUN İÇİNDE yeniden başlatılır (kuyruğa bağımlı değil → asla çevrimdışı kalmaz).
           # Yerel data.db korunur (en taze veri), sadece dist kodu güncellenir.
           # (Kalp atışı commit'leri dist/ dışındaki .backup-ref.json'a dokunduğu için restart tetiklemez.)
-          # Yedek yine 5 dakikada bir Telegram'a yapılır (veri kaybı ≤5 dk).
+          # Yedek her ~40 saniyede bir denetlenir, veri değiştiyse yüklenir.
           LAST_BACKUP=$SECONDS
+          LAST_HEARTBEAT=$SECONDS
           while kill -0 $BOT_PID 2>/dev/null; do
-            sleep 60
+            sleep 35
 
             git fetch origin main -q 2>/dev/null || true
             if ! git diff --quiet HEAD origin/main -- dist ':!dist/data.db' ':!dist/data.db.enc' 2>/dev/null; then
@@ -126,18 +130,32 @@ jobs:
               continue
             fi
 
-            if [ $((SECONDS - LAST_BACKUP)) -ge 300 ]; then
+            # ☁️ Yedek her ~40 saniyede bir denetlenir; veri değiştiyse SADECE
+            # Telegram'a yüklenir (repo'ya asla veri düşmez). Yeni işaretçi varsa
+            # hemen commit+push — run çökse bile işaretçi kaybolmaz.
+            if [ $((SECONDS - LAST_BACKUP)) -ge 40 ]; then
               LAST_BACKUP=$SECONDS
-              # ☁️ Yedek SADECE Telegram'a gider — repo'ya ASLA veri düşmez.
-              # Veri değişmediyse script atlar; referans aynı kalır.
               node scripts/db-backup.js || echo "⚠️ Telegram yedeği başarısız: $(date -u +%FT%TZ)"
-              # 🔁 Kalp atışı + yedek işaretçisi: repo'ya yalnızca son yedeğin
-              # file_id'si işlenir (veri değil). Bu push, botu ayakta tutan
-              # tetikleyicidir — cron, run in_progress iken atlanıyor.
-              # 2>/dev/null || true: yedek başarısız olursa referans dosyası yoktur;
-              # kalp atışı yine de push edilmeli (yoksa bot run sonunda ölür).
+              if [ -f .backup-ref.json ]; then
+                git add .backup-ref.json
+                if ! git diff --cached --quiet -- .backup-ref.json 2>/dev/null; then
+                  git commit -m "bot: yedek referansı ($(date -u +%FT%TZ))" -q || true
+                  git push origin HEAD:main -q 2>&1 || echo "⚠️ push başarısız: $(date -u +%FT%TZ)"
+                fi
+              fi
+            fi
+
+            # 🤖 Telegram komut servisi: /durum /top /uye /loglar /uyarilar
+            # (kısa long-poll — komut varsa veritabanından cevap verir)
+            node scripts/db-telegram.js || echo "⚠️ Telegram komut servisi hatası: $(date -u +%FT%TZ)"
+
+            # 🔁 Kalp atışı (5 dk): repo'ya yalnızca işaretçi/boş commit işlenir.
+            # Bu push, botu ayakta tutan tetikleyicidir — cron, run in_progress
+            # iken atlanıyor; kuyruğa sürekli yeni run koyar.
+            if [ $((SECONDS - LAST_HEARTBEAT)) -ge 300 ]; then
+              LAST_HEARTBEAT=$SECONDS
               git add .backup-ref.json 2>/dev/null || true
-              git commit -m "bot: kalp atışı + yedek referansı ($(date -u +%FT%TZ))" --allow-empty -q || true
+              git commit -m "bot: kalp atışı ($(date -u +%FT%TZ))" --allow-empty -q || true
               git push origin HEAD:main -q 2>&1 || echo "⚠️ push başarısız: $(date -u +%FT%TZ)"
             fi
           done
