@@ -10,10 +10,11 @@
     "deploy": "node dist/deploy-commands.js"
   },
   "dependencies": {
-    "sql.js": "^1.11.0",
+    "@discordjs/voice": "^0.18.0",
+    "@napi-rs/canvas": "^1.0.5",
     "discord.js": "^14.16.3",
     "node-cron": "^3.0.3",
-    "@discordjs/voice": "^0.18.0"
+    "sql.js": "^1.11.0"
   },
   "devDependencies": {
     "javascript-obfuscator": "^4.1.1"
