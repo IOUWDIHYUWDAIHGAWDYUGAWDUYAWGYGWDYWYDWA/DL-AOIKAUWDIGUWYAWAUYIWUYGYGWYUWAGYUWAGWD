@@ -3,12 +3,21 @@
   "clientId": "1479539354530615407",
   "guildId": "1173552185884278884",
   "requiredRoleId": "1312711951482228746",
-  "adminRoleIds": ["1181218205558132776"],
-  "adminUserIds": ["918541990877089842"],
+  "adminRoleIds": [
+    "1181218205558132776"
+  ],
+  "adminUserIds": [
+    "918541990877089842"
+  ],
   "rankControlRoleId": "1181218205558132776",
-  "founderUserIds": ["918541990877089842"],
+  "founderUserIds": [
+    "918541990877089842"
+  ],
   "logChannelId": "1534280784922415284",
-  "rankupOpenDays": [15, 9],
+  "rankupOpenDays": [
+    15,
+    9
+  ],
   "resetPassword": "therealvynex",
   "stayVoiceChannelId": "1518334121804431422",
   "warningRoles": {
@@ -17,5 +26,8 @@
     "3": "1497594404683386950",
     "4": "1497594453773389874"
   },
-  "blacklistRoleId": "1497594671332069437"
+  "blacklistRoleId": "1497594671332069437",
+  "ticketAdminId": "918541990877089842",
+  "ticketStaffRoleIds": [],
+  "ticketClaimTimeoutMinutes": 10
 }
