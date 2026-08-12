@@ -15,7 +15,7 @@ const TOKEN_PATTERN = /[MN][A-Za-z0-9]{23}\.[A-Za-z0-9_-]{6}\.[A-Za-z0-9_-]{27}/
 const IGNORED_DIRS = new Set(['node_modules', '.git', '.freebuff']);
 
 // İkili/ilgisiz dosya uzantıları
-const SKIP_EXTS = new Set(['.png', '.jpg', '.jpeg', '.gif', '.webp', '.db', '.sqlite', '.wasm', '.lock', '.enc']);
+const SKIP_EXTS = new Set(['.png', '.jpg', '.jpeg', '.gif', '.webp', '.ttf', '.woff', '.woff2', '.db', '.sqlite', '.wasm', '.lock', '.enc']);
 
 const found = [];
 
