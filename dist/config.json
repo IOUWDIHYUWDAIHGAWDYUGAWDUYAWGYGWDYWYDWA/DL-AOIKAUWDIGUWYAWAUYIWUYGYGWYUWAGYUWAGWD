@@ -29,5 +29,6 @@
   "blacklistRoleId": "1497594671332069437",
   "ticketAdminId": "918541990877089842",
   "ticketStaffRoleIds": [],
-  "ticketClaimTimeoutMinutes": 10
+  "ticketClaimTimeoutMinutes": 10,
+  "joinLeaveChannelId": "1268963060954038353"
 }
