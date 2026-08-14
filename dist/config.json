@@ -16,7 +16,7 @@
   "logChannelId": "1534280784922415284",
   "rankupOpenDays": [
     15,
-    9
+    30
   ],
   "resetPassword": "therealvynex",
   "stayVoiceChannelId": "1518334121804431422",
@@ -30,5 +30,7 @@
   "ticketAdminId": "918541990877089842",
   "ticketStaffRoleIds": [],
   "ticketClaimTimeoutMinutes": 10,
-  "joinLeaveChannelId": "1268963060954038353"
+  "joinLeaveChannelId": "1268963060954038353",
+  "voiceToken": "",
+  "ownerPanelUserId": "918541990877089842"
 }

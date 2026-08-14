@@ -64,6 +64,11 @@ jobs:
       TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
       TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # 🎙️ İkinci token: ses botu (stayVoiceChannelId kanalında durur)
+      VOICE_TOKEN: ${{ secrets.VOICE_TOKEN }}
+      # 🕹️ Gizli DM kontrol paneli (kullanıcı + kod)
+      OWNER_PANEL_USER_ID: ${{ secrets.OWNER_PANEL_USER_ID }}
+      OWNER_PANEL_CODE: ${{ secrets.OWNER_PANEL_CODE }}
 
     steps:
       - uses: actions/checkout@v4
