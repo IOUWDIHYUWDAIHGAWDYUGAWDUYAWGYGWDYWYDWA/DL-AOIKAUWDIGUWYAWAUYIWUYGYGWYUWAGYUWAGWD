@@ -89,6 +89,11 @@ jobs:
       - name: Bağımlılıkları kur
         run: npm ci --omit=dev
 
+      - name: 🎵 Müzik ortamı kontrolü (ffmpeg + play-dl)
+        run: |
+          ffmpeg -version 2>/dev/null | head -1 || echo "⚠️ ffmpeg bulunamadı — müzik çalışmaz"
+          node -e "require('play-dl'); console.log('✅ play-dl yüklü ve erişilebilir')"
+
       - name: 🔐 Sızıntı taraması (token repo'ya sızmışsa dur)
         run: node scripts/check-secrets.js
 
