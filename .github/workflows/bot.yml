@@ -95,8 +95,10 @@ jobs:
         run: |
           # yt-dlp — YouTube 2026'da WEB istemcisine format URL'leri vermiyor;
           # yt-dlp android istemcisi GitHub IP'sinde bile çalışıyor.
-          curl -sL https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp
-          chmod +x /usr/local/bin/yt-dlp
+          # (/usr/local/bin runner'da root'a ait — sudo gerekir; bot yoksa kendi indirir)
+          curl -sL https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /tmp/yt-dlp
+          chmod +x /tmp/yt-dlp
+          sudo install -m 755 /tmp/yt-dlp /usr/local/bin/yt-dlp
           yt-dlp --version
           ffmpeg -version 2>/dev/null | head -1 || echo "⚠️ ffmpeg bulunamadı — müzik çalışmaz"
           node -e "require('play-dl'); console.log('✅ play-dl yüklü ve erişilebilir')"
