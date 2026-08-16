@@ -2,24 +2,29 @@
 
 ## Bu repo'da ne var?
 
-Bu **public** repo'da botun **şifrelenmiş (obfuscated) derlemesi** (`dist/`) ve altyapı dosyaları vardır. **Ham kaynak kod repo'da YOKTUR** — yalnızca senin bilgisayarında durur (`.gitignore` ile korunur). Böylece:
+Bu **public** repo'da botun **gerçekten şifrelenmiş derlemesi** (`dist/`) ve altyapı dosyaları vardır. **Ham kaynak kod repo'da YOKTUR** — yalnızca senin bilgisayarında durur (`.gitignore` ile korunur). Repo içeriği:
 
-- Repo'yu açan biri botun gerçek kodunu göremez (okunması zorlaştırılmış derleme görür).
-- Botun gerçek markası kod içinde **şifreli** tutulur (çalışma anında XOR ile çözülür) — repo'da aratılsa bile düz metin olarak bulunamaz.
+- `dist/**/*.js.enc` — her kaynak dosya **AES-256-GCM** ile şifrelenmiş bloklar halinde (`SOURCE_KEY`, 32 byte = 64 hex karakter). Anahtar olmadan **okunamaz ve çalıştırılamaz**.
+- `dist/start.js` — küçük şifre çözücü/başlatıcı; içinde sır YOKTUR, `SOURCE_KEY`'i ortam değişkeninden okur.
+- `dist/config.json` — sır içermeyen ayarlar (token/şifre alanları boşaltılır).
+- Botun gerçek markası kod içinde **şifreli** tutulur (çalışma anında çözülür) — repo'da aratılsa bile düz metin olarak bulunamaz.
 - Discord token'ı asla kodda yoktur; sadece GitHub secret'ında (şifreli) durur.
 
-> ⚠️ Dürüst not: Kod şifreleme (obfuscation) okumayı **zorlaştırır**, imkânsız kılmaz. Kararlı biri çözmek için uğraşabilir. Gerçek gizlilik = kaynağın yayınlanmamasıdır; bu repo bunu sağlar. Token ise gerçekten şifrelidir (GitHub secrets, geri okunamaz).
+> ⚠️ Dürüst not: Kod repo'da AES-256 ile şifrelidir; anahtarsız kırılamaz. Ama kod **çalışmak için** çözülmek zorundadır: `SOURCE_KEY`'e sahip olan (sen, CI runner'ı) çözülmüş kodu görebilir. Yani koruma, anahtarı yalnızca sende tutmaya dayanır — anahtarı kimseyle paylaşma, GitHub'a secret olarak ekle, asla commit etme.
 
 ## Geliştirme döngüsü (kaynağı düzenlerken)
 
 Kaynak dosyalar (index.js, commands/, utils/ vb.) bilgisayarında durur. Değişiklik yaptıktan sonra:
 
 ```bash
-npm run obfuscate   # dist/ klasörünü yeniden şifreler
+SOURCE_KEY=<64 hex> npm run build   # obfuscate + AES-256 şifreleme (dist/ yeniden üretilir)
 git add dist && git commit -m "güncelleme" && git push
 ```
 
-Bot her yerde `dist/index.js`'ten çalışır (`npm start`), kaynaktan çalıştırmak için `npm run dev`.
+> `SOURCE_KEY` üretmek için: `node scripts/db-crypto.js keygen` (64 hex karakter çıkarır).
+> Bu anahtarı GitHub → Settings → Secrets and variables → Actions → `SOURCE_KEY` olarak ekle.
+
+Bot her yerde `dist/start.js`'ten çalışır (`npm start` — şifreli dosyaları `SOURCE_KEY` ile çözer), kaynaktan çalıştırmak için `npm run dev`.
 
 ---
 
@@ -34,8 +39,9 @@ GitHub, public repo'larda Actions dakikalarını ücretsiz verir (sınırsız). 
 
 1. **Token'ı sıfırla:** [Discord Developer Portal](https://discord.com/developers/applications) → botun → **Reset Token** → yeni token'ı kopyala. (Eski token herhangi bir yerde göründüyse artık geçersiz sayılır.)
 2. **Public repo** hazır (ör. `qbjbxsanfhkemvnaoclmbpvq`). İstersen repo adını da bu rastgele isme çevirebilirsin (Settings → General → Rename; eski adres otomatik yönlendirir).
-3. **Secret ekle:** Repo → Settings → Secrets and variables → Actions → `TOKEN` (zorunlu) + `DB_KEY` (zorunlu — veritabanı şifresi) + istersen `CLIENT_ID`, `GUILD_ID`, `ADMIN_ROLE_IDS`, `LOG_CHANNEL_ID`, `TELEGRAM_TOKEN`, `TELEGRAM_CHAT_ID` (Telegram yedeği, aşağıya bak) vb.
-   > `DB_KEY` üretmek için: `node scripts/db-crypto.js keygen` (64 hex karakter çıkarır, bu çıktıyı secret'a yapıştır).
+3. **Secret ekle:** Repo → Settings → Secrets and variables → Actions → `TOKEN` (zorunlu) + `DB_KEY` (zorunlu — veritabanı şifresi) + `SOURCE_KEY` (zorunlu — kaynak kod şifresi) + istersen `CLIENT_ID`, `GUILD_ID`, `ADMIN_ROLE_IDS`, `LOG_CHANNEL_ID`, `TELEGRAM_TOKEN`, `TELEGRAM_CHAT_ID` (Telegram yedeği, aşağıya bak) vb.
+   > `DB_KEY` ve `SOURCE_KEY` üretmek için: `node scripts/db-crypto.js keygen` (64 hex karakter çıkarır, bu çıktıyı secret'a yapıştır).
+   > Anahtarları YALNIZCA secret olarak sakla; asla `.env`'i veya anahtarı repo'ya commit etme.
    > Token bir kez girilince GitHub onu **geri göstermez** — sadece değiştirilebilir. Yani setup'tan sonra token'ı sen bile okuyamazsın.
 4. **Actions** sekmesinden workflow'u elle bir kez başlat; sonrasını cron devralır.
 5. Doğrula: run'lar aralıksız sıralanmalı, loglarda başlatma mesajı görünmeli.
@@ -62,6 +68,8 @@ Docker: `cp .env.example .env` → `docker compose up -d --build` (DB `/app/data
 ## 🥉 Kendi bilgisayarın (kart yok, en gizli)
 
 Sürekli açık bir PC/Raspberry Pi: `deploy/qbjbxsanfhkemvnaoclmbpvq-bot.service` ile servis olarak çalıştır. Kod hiçbir yere gitmez.
+
+> 💡 Yerel çalıştırmada (npm start / Docker / systemd) `.env` içinde **SOURCE_KEY** de olmalı — yoksa şifreli `dist/*.js.enc` dosyaları çözülemez ve bot başlamaz.
 
 ---
 
@@ -113,5 +121,6 @@ TELEGRAM_TOKEN=... TELEGRAM_CHAT_ID=... node scripts/db-backup.js
 |---|---|
 | Token | Sadece GitHub secret'ında (şifreli, geri okunamaz) |
 | Ham kaynak kod | Sadece senin bilgisayarında |
-| Public repo içeriği | Şifrelenmiş dist/ + altyapı; botun gerçek adı düz metin olarak YOK |
+| Public repo içeriği | AES-256-GCM ile şifrelenmiş dist/ (SOURCE_KEY'siz okunamaz) + altyapı; botun gerçek adı düz metin olarak YOK |
+| SOURCE_KEY / DB_KEY | Sadece GitHub secret'larında (geri okunamaz) |
 | Veritabanı | Repo'da YOK — yalnızca Telegram'da şifreli (AES-256); repo'da sadece son yedeğin file_id işaretçisi |

@@ -21,3 +21,10 @@ data.db
 # dist içindeki çalışma zamanı dosyaları — veri repo'ya ASLA girmez
 /dist/data.db
 /dist/data.db.enc
+
+# ── Şifreli derleme: repo'da yalnızca .enc blokları + start.js olur ──
+# dist içindeki .js dosyaları, start.js tarafından ÇALIŞMA ANINDA .enc'den
+# çözülür; commit'e/repo'ya ASLA girmemeli. (dist/start.js sır içermez, açık kalır.)
+/dist/*.js
+/dist/**/*.js
+!/dist/start.js

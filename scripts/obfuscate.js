@@ -81,7 +81,18 @@ for (const rel of SOURCE_FILES) {
     fs.writeFileSync(path.join(DIST, rel), obfuscated);
 }
 
-// Çalışma zamanı için gerekli, gizli olmayan dosyaları kopyala
-fs.copyFileSync(path.join(ROOT, 'config.json'), path.join(DIST, 'config.json'));
+// Çalışma zamanı için gerekli config.json'u kopyala ama GİZLİ alanları mutlaka boşalt.
+// Token/voiceToken/resetPassword/ownerPanelCode gibi değerler YALNIZCA ortam
+// değişkenlerinden (GitHub Actions secret'ları) gelmeli — repo'ya asla düşmemeli.
+// (Geçmişte resetPassword bu kopyalama yüzünden public dist/config.json'a sızmıştı.)
+const SECRET_CONFIG_KEYS = ['token', 'voiceToken', 'resetPassword', 'ownerPanelCode'];
+function copySanitizedConfig() {
+    const raw = JSON.parse(fs.readFileSync(path.join(ROOT, 'config.json'), 'utf8'));
+    for (const key of SECRET_CONFIG_KEYS) {
+        if (key in raw) raw[key] = '';
+    }
+    fs.writeFileSync(path.join(DIST, 'config.json'), JSON.stringify(raw, null, 2));
+}
+copySanitizedConfig();
 
 console.log(`✅ dist/ oluşturuldu — ${SOURCE_FILES.length} dosya şifrelendi.`);

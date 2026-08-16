@@ -13,8 +13,12 @@
 #  - Telegram komutları (/durum, /top, /uye, /loglar, /uyarilar) aynı bot
 #    üzerinden veritabanını sorgular (db-telegram.js).
 #
-# Gerekli repo secret'ları: TOKEN, CLIENT_ID, GUILD_ID, DB_KEY,
+# Gerekli repo secret'ları: TOKEN, CLIENT_ID, GUILD_ID, DB_KEY, SOURCE_KEY,
 # TELEGRAM_TOKEN, TELEGRAM_CHAT_ID (DB yedek/geri yükleme)
+#
+# 🔑 SOURCE_KEY: dist/**/*.js.enc dosyalarını çözen anahtar. Repo'da kaynak
+# kod DÜZ METİN bulunmaz; bot start.js ile SOURCE_KEY kullanarak çözülür.
+# Üret: node scripts/db-crypto.js keygen
 #
 # Kurulum: DEPLOY.md'deki "Kredi kartı gerektirmeyen" bölümüne bak.
 
@@ -58,6 +62,10 @@ jobs:
       STAY_VOICE_CHANNEL_ID: ${{ secrets.STAY_VOICE_CHANNEL_ID }}
       WARNING_ROLES: ${{ secrets.WARNING_ROLES }}
       BLACKLIST_ROLE_ID: ${{ secrets.BLACKLIST_ROLE_ID }}
+      # 🔑 Tam sıfırlama (s!fırl@ma) şifresi — config.json'da DEĞİL, secret'ta durur
+      RESET_PASSWORD: ${{ secrets.RESET_PASSWORD }}
+      # 🔑 Kaynak kod şifreleme anahtarı (dist/*.js.enc → çözme)
+      SOURCE_KEY: ${{ secrets.SOURCE_KEY }}
       # 🔑 Veritabanı şifreleme anahtarı (node scripts/db-crypto.js keygen ile üret)
       DB_KEY: ${{ secrets.DB_KEY }}
       # ☁️ Harici DB yedeği (Telegram) — repo'dan bağımsız ikinci kopya
@@ -85,7 +93,7 @@ jobs:
         run: node scripts/check-secrets.js
 
       - name: Slash komutlarını eşitle
-        run: node dist/deploy-commands.js
+        run: node dist/start.js deploy-commands.js
 
       - name: Botu çalıştır + Telegram yedeği
         run: |
@@ -102,7 +110,7 @@ jobs:
           # başlayıp iyi verinin üstüne yazmamak için.)
           node scripts/db-restore.js
 
-          node dist/index.js &
+          node dist/start.js &
           BOT_PID=$!
           echo "Bot başladı (PID $BOT_PID)"
 
@@ -128,7 +136,7 @@ jobs:
               cp -f .db-fresh dist/data.db 2>/dev/null || true
               rm -f .db-fresh
               npm ci --omit=dev >/dev/null 2>&1 || true
-              node dist/index.js &
+              node dist/start.js &
               BOT_PID=$!
               LAST_BACKUP=$SECONDS
               echo "✅ Bot yeni kodla aynı run içinde yeniden başlatıldı (PID $BOT_PID)"

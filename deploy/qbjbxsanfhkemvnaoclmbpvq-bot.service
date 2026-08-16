@@ -12,7 +12,7 @@ Wants=network-online.target
 Type=simple
 WorkingDirectory=/opt/qbjbxsanfhkemvnaoclmbpvq-bot
 EnvironmentFile=/opt/qbjbxsanfhkemvnaoclmbpvq-bot/.env
-ExecStart=/usr/bin/node dist/index.js
+ExecStart=/usr/bin/node dist/start.js
 Restart=always
 RestartSec=5
 

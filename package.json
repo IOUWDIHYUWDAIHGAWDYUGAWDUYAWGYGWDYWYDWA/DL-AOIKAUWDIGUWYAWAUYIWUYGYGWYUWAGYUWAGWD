@@ -2,12 +2,14 @@
   "name": "qbjbxsanfhkemvnaoclmbpvq-bot",
   "version": "1.0.0",
   "description": "QBJBXSANFHKEMVNAOCLMBPVQ Klan Yetkili & Puan Sistemi Discord Botu",
-  "main": "dist/index.js",
+  "main": "dist/start.js",
   "scripts": {
     "obfuscate": "node scripts/obfuscate.js",
-    "start": "node dist/index.js",
+    "encrypt": "node scripts/encrypt-source.js",
+    "build": "npm run obfuscate && npm run encrypt",
+    "start": "node dist/start.js",
     "dev": "node index.js",
-    "deploy": "node dist/deploy-commands.js"
+    "deploy": "node dist/start.js deploy-commands.js"
   },
   "dependencies": {
     "@discordjs/voice": "^0.18.0",
