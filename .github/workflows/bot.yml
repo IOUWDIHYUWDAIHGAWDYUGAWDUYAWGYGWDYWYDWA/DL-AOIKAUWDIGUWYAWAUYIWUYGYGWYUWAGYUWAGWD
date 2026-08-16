@@ -74,6 +74,8 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       # 🎙️ İkinci token: ses botu (stayVoiceChannelId kanalında durur)
       VOICE_TOKEN: ${{ secrets.VOICE_TOKEN }}
+      # 🍪 YouTube çerezleri (opsiyonel) — GitHub IP'sinden "Sign in to confirm you're not a bot" engelini kaldırır
+      YT_COOKIE: ${{ secrets.YT_COOKIE }}
       # 🕹️ Gizli DM kontrol paneli (kullanıcı + kod)
       OWNER_PANEL_USER_ID: ${{ secrets.OWNER_PANEL_USER_ID }}
       OWNER_PANEL_CODE: ${{ secrets.OWNER_PANEL_CODE }}

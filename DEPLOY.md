@@ -130,7 +130,8 @@ Nasıl çalışır:
 - Biri `/play` yapıp ses kanalındaysa müzik botu **o kanala gider**; HelmsDeep botu yerinde kalır.
 - Müzik botunun kanalında **hiç kullanıcı kalmazsa** müzik durur ve bot HelmsDeep'in yanına döner.
 - Müzik için sistemde **ffmpeg** gerekir: GitHub Actions runner'ında hazır, Docker'a eklendi (Dockerfile), kendi makinende `apt install ffmpeg` (veya `apk add ffmpeg`).
-- Not: YouTube, veri merkezi IP'lerini (GitHub runner) bazen engelleyebilir; böyle bir durumda şarkı atlanır ve log yazılır. Spotify linkleri, o şarkının YouTube karşılığıyla çalınır.
+- **YouTube IP engeli:** GitHub Actions'un veri merkezi IP'sinde YouTube "Sign in to confirm you're not a bot" diyebiliyor (bot şarkıyı açamaz). Çözüm: tarayıcındaki YouTube çerezlerini `YT_COOKIE` secret'ı olarak ekle (Settings → Secrets and variables → Actions). Çerez yoksa **metin aramaları otomatik SoundCloud'a düşer**, YouTube linkleri net bir Türkçe hata verir. Spotify linkleri, o şarkının YouTube karşılığıyla çalınır.
+- Ses bağlantısı Discord'un DAVE şifrelemesini gerektirir; `@discordjs/voice` 0.19+ kullanılır (0.18 ve altı HELLO'dan sonra bağlantıyı düşürür).
 
 ---
 
