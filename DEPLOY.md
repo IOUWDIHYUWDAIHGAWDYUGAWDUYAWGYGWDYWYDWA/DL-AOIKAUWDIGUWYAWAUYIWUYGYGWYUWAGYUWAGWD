@@ -115,6 +115,25 @@ Başka yerde de çalıştırılabilir (Docker, systemd, cron):
 TELEGRAM_TOKEN=... TELEGRAM_CHAT_ID=... node scripts/db-backup.js
 ```
 
+## 🎵 Müzik komutları (ses botu üzerinden)
+
+| Komut | Ne yapar |
+|---|---|
+| `/play <ad veya link>` | Şarkı çalar / kuyruğa ekler (YouTube, Spotify, SoundCloud, playlist). Müzik botu senin kanalına gelir. |
+| `/gec` | Çalan şarkıyı atlar |
+| `/durdur` | Müziği durdurur, kuyruğu temizler |
+| `/sira` | Kuyruğu ve çalan şarkıyı gösterir |
+| `/tekrar` | Şarkı tekrarını açar/kapatır |
+
+Nasıl çalışır:
+- Müzik botu (`VOICE_TOKEN`) **boştayken HelmsDeep botunun yanında** durur.
+- Biri `/play` yapıp ses kanalındaysa müzik botu **o kanala gider**; HelmsDeep botu yerinde kalır.
+- Müzik botunun kanalında **hiç kullanıcı kalmazsa** müzik durur ve bot HelmsDeep'in yanına döner.
+- Müzik için sistemde **ffmpeg** gerekir: GitHub Actions runner'ında hazır, Docker'a eklendi (Dockerfile), kendi makinende `apt install ffmpeg` (veya `apk add ffmpeg`).
+- Not: YouTube, veri merkezi IP'lerini (GitHub runner) bazen engelleyebilir; böyle bir durumda şarkı atlanır ve log yazılır. Spotify linkleri, o şarkının YouTube karşılığıyla çalınır.
+
+---
+
 ## 🔐 Güvenlik özeti
 
 | Ne | Nerede |
