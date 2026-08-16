@@ -100,7 +100,13 @@ jobs:
           chmod +x /tmp/yt-dlp
           sudo install -m 755 /tmp/yt-dlp /usr/local/bin/yt-dlp
           yt-dlp --version
-          ffmpeg -version 2>/dev/null | head -1 || echo "⚠️ ffmpeg bulunamadı — müzik çalışmaz"
+          # ffmpeg: runner imajlarında bazen eksik olabiliyor — garantiye al
+          if ! command -v ffmpeg >/dev/null 2>&1; then
+            echo "⚠️ ffmpeg yok, kuruluyor (apt)..."
+            sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+          fi
+          ffmpeg -version 2>/dev/null | head -1 || echo "⚠️ ffmpeg hâlâ yok — ffmpeg-static paketi devrede"
+          node -e "const f=require('ffmpeg-static'); console.log('✅ ffmpeg-static hazır:', f)"
           node -e "require('play-dl'); console.log('✅ play-dl yüklü ve erişilebilir')"
           echo "✅ yt-dlp hazır: $(yt-dlp --version)"
 
