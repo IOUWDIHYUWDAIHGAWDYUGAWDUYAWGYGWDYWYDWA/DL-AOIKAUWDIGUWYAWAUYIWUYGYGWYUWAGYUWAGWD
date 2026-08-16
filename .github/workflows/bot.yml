@@ -91,10 +91,16 @@ jobs:
       - name: Bağımlılıkları kur
         run: npm ci --omit=dev
 
-      - name: 🎵 Müzik ortamı kontrolü (ffmpeg + play-dl)
+      - name: 🎵 Müzik ortamı kurulumu (yt-dlp + ffmpeg)
         run: |
+          # yt-dlp — YouTube 2026'da WEB istemcisine format URL'leri vermiyor;
+          # yt-dlp android istemcisi GitHub IP'sinde bile çalışıyor.
+          curl -sL https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp
+          chmod +x /usr/local/bin/yt-dlp
+          yt-dlp --version
           ffmpeg -version 2>/dev/null | head -1 || echo "⚠️ ffmpeg bulunamadı — müzik çalışmaz"
           node -e "require('play-dl'); console.log('✅ play-dl yüklü ve erişilebilir')"
+          echo "✅ yt-dlp hazır: $(yt-dlp --version)"
 
       - name: 🔐 Sızıntı taraması (token repo'ya sızmışsa dur)
         run: node scripts/check-secrets.js
