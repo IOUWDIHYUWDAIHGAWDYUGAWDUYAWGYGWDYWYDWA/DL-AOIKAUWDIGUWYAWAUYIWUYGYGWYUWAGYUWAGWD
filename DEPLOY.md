@@ -130,7 +130,7 @@ Nasıl çalışır:
 - Biri `/play` yapıp ses kanalındaysa müzik botu **o kanala gider**; HelmsDeep botu yerinde kalır.
 - Müzik botunun kanalında **hiç kullanıcı kalmazsa** müzik durur ve bot HelmsDeep'in yanına döner.
 - Müzik için sistemde **ffmpeg + yt-dlp** gerekir. **yt-dlp** şart: YouTube 2026'da eski WEB istemcisine format URL'lerini vermiyor; bot yt-dlp'nin android istemcisiyle çalışır. GitHub Actions workflow'u yt-dlp'yi otomatik kurar, Dockerfile'a eklendi; kendi makinende `pip install yt-dlp` veya `curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp && chmod +x /usr/local/bin/yt-dlp` (Windows'ta `yt-dlp.exe` indir ve `YTDLP_BIN` ile göster).
-- **YouTube IP engeli:** GitHub Actions'un veri merkezi IP'sinde YouTube "Sign in to confirm you're not a bot" diyebiliyor (bot şarkıyı açamaz). Çözüm: tarayıcındaki YouTube çerezlerini `YT_COOKIE` secret'ı olarak ekle (Settings → Secrets and variables → Actions). Çerez yoksa **metin aramaları otomatik SoundCloud'a düşer**, YouTube linkleri net bir Türkçe hata verir. Spotify linkleri, o şarkının YouTube karşılığıyla çalınır.
+- **YouTube API & IP Desteği:** Şarkı arama, playlist çözme ve video bilgisi alma işlemleri için **YouTube Data API v3** desteklenir. GitHub → Settings → Secrets and variables → Actions → `YOUTUBE` olarak API anahtarınızı ekleyin. API tanımlandığında çerez gerekmeksizin aramalar ve playlistler Google API üzerinden anında çözülür. İsteğe bağlı olarak `YT_COOKIE` de desteklenmeye devam eder. Her ikisi de yoksa sistem akıllı fallback (SoundCloud/android istemcisi) ile çalışır.
 - Ses bağlantısı Discord'un DAVE şifrelemesini gerektirir; `@discordjs/voice` 0.19+ kullanılır (0.18 ve altı HELLO'dan sonra bağlantıyı düşürür).
 
 ---
