@@ -81,6 +81,9 @@ jobs:
       # 🕹️ Gizli DM kontrol paneli (kullanıcı + kod)
       OWNER_PANEL_USER_ID: ${{ secrets.OWNER_PANEL_USER_ID }}
       OWNER_PANEL_CODE: ${{ secrets.OWNER_PANEL_CODE }}
+      # 🌸 Worna Bot Token & Ses Kanalı (2. Sunucu)
+      WORNA: ${{ secrets.WORNA }}
+      WORNA_VOICE_CHANNEL_ID: ${{ secrets.WORNA_VOICE_CHANNEL_ID }}
 
     steps:
       - uses: actions/checkout@v4
