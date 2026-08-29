@@ -72,15 +72,6 @@ jobs:
       TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
       TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      # 🎙️ İkinci token: ses botu (stayVoiceChannelId kanalında durur)
-      VOICE_TOKEN: ${{ secrets.VOICE_TOKEN }}
-      # 🔑 YouTube Data API v3 Anahtarı (Arama ve playlistleri resmi API ile çeker)
-      YOUTUBE: ${{ secrets.YOUTUBE }}
-      # 🍪 YouTube çerezleri (opsiyonel) — GitHub IP'sinden "Sign in to confirm you're not a bot" engelini kaldırır
-      YT_COOKIE: ${{ secrets.YT_COOKIE }}
-      # 🕹️ Gizli DM kontrol paneli (kullanıcı + kod)
-      OWNER_PANEL_USER_ID: ${{ secrets.OWNER_PANEL_USER_ID }}
-      OWNER_PANEL_CODE: ${{ secrets.OWNER_PANEL_CODE }}
       # 🌸 Worna Bot Token & Ses Kanalı (2. Sunucu)
       WORNA: ${{ secrets.WORNA }}
       WORNA_VOICE_CHANNEL_ID: ${{ secrets.WORNA_VOICE_CHANNEL_ID }}
@@ -95,25 +86,6 @@ jobs:
 
       - name: Bağımlılıkları kur
         run: npm ci --omit=dev
-
-      - name: 🎵 Müzik ortamı kurulumu (yt-dlp + ffmpeg)
-        run: |
-          # yt-dlp — YouTube 2026'da WEB istemcisine format URL'leri vermiyor;
-          # yt-dlp android istemcisi GitHub IP'sinde bile çalışıyor.
-          # (/usr/local/bin runner'da root'a ait — sudo gerekir; bot yoksa kendi indirir)
-          curl -sL https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /tmp/yt-dlp
-          chmod +x /tmp/yt-dlp
-          sudo install -m 755 /tmp/yt-dlp /usr/local/bin/yt-dlp
-          yt-dlp --version
-          # ffmpeg: runner imajlarında bazen eksik olabiliyor — garantiye al
-          if ! command -v ffmpeg >/dev/null 2>&1; then
-            echo "⚠️ ffmpeg yok, kuruluyor (apt)..."
-            sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
-          fi
-          ffmpeg -version 2>/dev/null | head -1 || echo "⚠️ ffmpeg hâlâ yok — ffmpeg-static paketi devrede"
-          node -e "const f=require('ffmpeg-static'); console.log('✅ ffmpeg-static hazır:', f)"
-          node -e "require('play-dl'); console.log('✅ play-dl yüklü ve erişilebilir')"
-          echo "✅ yt-dlp hazır: $(yt-dlp --version)"
 
       - name: 🔐 Sızıntı taraması (token repo'ya sızmışsa dur)
         run: node scripts/check-secrets.js
