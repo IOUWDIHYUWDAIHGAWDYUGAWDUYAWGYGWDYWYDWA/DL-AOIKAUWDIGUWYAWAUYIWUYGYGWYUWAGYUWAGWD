@@ -93,9 +93,21 @@ async function main() {
     const filePath = g.result && g.result.file_path;
     if (!filePath) fail(`getFile beklenmedik yanıt: ${JSON.stringify(g.result).slice(0, 200)}`);
 
-    const res = await fetch(`https://api.telegram.org/file/bot${TOKEN}/${filePath}`);
-    if (!res.ok) fail(`Dosya indirilemedi: HTTP ${res.status}`);
-    const buf = Buffer.from(await res.arrayBuffer());
+    let buf = null;
+    let dlErr = null;
+    for (let i = 1; i <= 5; i++) {
+        try {
+            const res = await fetch(`https://api.telegram.org/file/bot${TOKEN}/${filePath}`);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            buf = Buffer.from(await res.arrayBuffer());
+            break;
+        } catch (e) {
+            dlErr = e;
+            console.warn(`⚠️ Dosya indirme başarısız (${i}/5): ${e.message}`);
+            if (i < 5) await sleep(2000);
+        }
+    }
+    if (!buf) fail(`Dosya indirilemedi: ${dlErr.message}`);
 
     let plain;
     try {
