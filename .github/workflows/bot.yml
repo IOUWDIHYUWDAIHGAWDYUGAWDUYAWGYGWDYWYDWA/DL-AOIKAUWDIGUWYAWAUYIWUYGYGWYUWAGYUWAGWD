@@ -43,6 +43,7 @@ concurrency:
 
 permissions:
   contents: write
+  actions: write
 
 jobs:
   bot:
@@ -72,6 +73,7 @@ jobs:
       TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
       TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       # 🌸 Worna Bot Token & Ses Kanalı (2. Sunucu)
       WORNA: ${{ secrets.WORNA }}
       WORNA_VOICE_CHANNEL_ID: ${{ secrets.WORNA_VOICE_CHANNEL_ID }}
@@ -119,8 +121,35 @@ jobs:
           # Yedek her 5 dakikada bir denetlenir, veri değiştiyse yüklenir.
           LAST_BACKUP=$SECONDS
           LAST_HEARTBEAT=$SECONDS
+          TRIGGERED_NEXT=0
+          # 5 saat = 18000 saniye (timeout-minutes 350 yani 21000 saniyedir)
+          MAX_RUNTIME_SECONDS=18000
+
           while kill -0 $BOT_PID 2>/dev/null; do
             sleep 60
+
+            # ?? KES?NT?S?Z DEV?R TESL?M: 5. saate (18000 sn) ula??ld???nda
+            # sonraki run'? hemen s?raya al, son yede?i al ve temizce devret.
+            if [ $SECONDS -ge $MAX_RUNTIME_SECONDS ] && [ $TRIGGERED_NEXT -eq 0 ]; then
+              TRIGGERED_NEXT=1
+              echo "? 5 saatlik ?al??ma s?resi tamamland?. Kesintisiz devir teslim ba?lat?l?yor..."
+              node scripts/db-backup.js || true
+              if [ -f .backup-ref.json ]; then
+                git add .backup-ref.json
+                git commit -m "bot: devir teslim ?ncesi son yedek ($(date -u +%FT%TZ))" -q || true
+                git push origin HEAD:main -q 2>&1 || true
+              fi
+              echo "?? S?radaki workflow tetikleniyor..."
+              gh workflow run bot.yml || curl -s -X POST \
+                -H "Authorization: token ${GITHUB_TOKEN}" \
+                -H "Accept: application/vnd.github.v3+json" \
+                "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/bot.yml/dispatches" \
+                -d '{"ref":"main"}' || true
+              echo "?? Mevcut bot durduruluyor, s?radaki run g?revi hemen devralacak."
+              kill $BOT_PID 2>/dev/null || true
+              wait $BOT_PID 2>/dev/null || true
+              break
+            fi
 
             git fetch origin main -q 2>/dev/null || true
             if ! git diff --quiet HEAD origin/main -- dist ':!dist/data.db' ':!dist/data.db.enc' 2>/dev/null; then
